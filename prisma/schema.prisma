@@ -1,0 +1,266 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// =========================================================================
+// Enums (SQLite processes these as TEXT columns, typed in TS by Prisma)
+// =========================================================================
+
+enum DivisionSlug {
+  skripsi
+  job
+  skill
+  personal
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum ContractStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+}
+
+enum ApplicationStatus {
+  WISHLIST
+  APPLIED
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
+enum ArtifactType {
+  REPO
+  ARTICLE
+  DEPLOY
+  DESIGN
+}
+
+enum AuditEvent {
+  CREATED_GOAL
+  DELETED_TASK
+  FINISHED_WEEKLY_CONTRACT
+  RESET_STREAK
+}
+
+// =========================================================================
+// Models
+// =========================================================================
+
+model CompanyConfig {
+  id              Int      @id @default(1)
+  companyName     String   @default("IDONG OS")
+  currentStreak   Int      @default(0)
+  longestStreak   Int      @default(0)
+  redFlagStatus   Boolean  @default(false)
+  lastStreakReset DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Division {
+  id    String       @id @default(uuid())
+  name  String
+  slug  DivisionSlug @unique
+  goals Goal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Goal {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  divisionId  String
+  division    Division   @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  artifacts   Artifact[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Task {
+  id                String             @id @default(uuid())
+  title             String
+  description       String?
+  status            TaskStatus         @default(TODO)
+  dueDate           DateTime?
+  artifactLink      String?
+  goalId            String
+  goal              Goal               @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  artifacts         Artifact[]
+  weeklyCommitments WeeklyCommitment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([goalId])
+}
+
+model DailyLog {
+  id            String   @id @default(uuid())
+  loggedAt      DateTime @unique
+  standupDone   Boolean  @default(true)
+  whatFinished  String
+  blocker       String
+  focusTomorrow String
+  energyLevel   Int
+  moodLevel     Int
+  artifactProof String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
+model WeeklyContract {
+  id          String             @id @default(uuid())
+  weekNumber  Int
+  year        Int
+  score       Float              @default(0.0)
+  status      ContractStatus     @default(ACTIVE)
+  reviewNote  String?
+  commitments WeeklyCommitment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([weekNumber, year])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model WeeklyCommitment {
+  id         String         @id @default(uuid())
+  contractId String
+  contract   WeeklyContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  taskId     String
+  task       Task           @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contractId])
+  @@index([taskId])
+}
+
+model DecisionRecord {
+  id            String           @id @default(uuid())
+  title         String
+  reasoning     String?
+  finalOptionId String?          @unique
+  finalOption   DecisionOption?  @relation("FinalDecision", fields: [finalOptionId], references: [id], onDelete: SetNull)
+  options       DecisionOption[] @relation("DecisionOptions")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
+model DecisionOption {
+  id               String          @id @default(uuid())
+  name             String
+  decisionRecordId String
+  decisionRecord   DecisionRecord  @relation("DecisionOptions", fields: [decisionRecordId], references: [id], onDelete: Cascade)
+  scores           DecisionScore[]
+  finalizedFor     DecisionRecord? @relation("FinalDecision")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([decisionRecordId])
+}
+
+model DecisionScore {
+  id             String         @id @default(uuid())
+  criteriaName   String
+  criteriaWeight Float
+  scoreValue     Int
+  optionId       String
+  option         DecisionOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([optionId])
+}
+
+model Application {
+  id          String            @id @default(uuid())
+  company     String
+  position    String
+  status      ApplicationStatus @default(WISHLIST)
+  appliedDate DateTime?
+  notes       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Certification {
+  id            String    @id @default(uuid())
+  name          String
+  targetDate    DateTime?
+  completedTask Int       @default(0)
+  totalTask     Int       @default(0)
+  resourceLink  String?
+  provider      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
+model Artifact {
+  id     String       @id @default(uuid())
+  type   ArtifactType
+  title  String
+  url    String
+  goalId String?
+  goal   Goal?        @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  taskId String?
+  task   Task?        @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([goalId])
+}
+
+model AuditLog {
+  id        String     @id @default(uuid())
+  event     AuditEvent
+  details   String?
+  actor     String?
+  source    String?
+  system    String?
+  telegram  String?
+  github    String?
+  dashboard String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt])
+}
