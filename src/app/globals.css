@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode Variables */
+    --background: #fafafa;
+    --foreground: #111827;
+
+    --card: #ffffff;
+    --card-foreground: #111827;
+    --card-border: #e5e7eb;
+
+    --primary: #0f172a;
+    --primary-foreground: #f8fafc;
+
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+
+    --success: #10b981;
+    --success-foreground: #ffffff;
+
+    --warning: #f59e0b;
+    --warning-foreground: #ffffff;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+
+    --border: #e2e8f0;
+    --radius: 6px;
+
+    /* Fallback Font references if next/font fails */
+    --font-outfit: "Outfit", sans-serif;
+    --font-geist-mono: "Geist Mono", monospace;
+  }
+
+  /* Dark mode is default */
+  .dark,
+  :root {
+    /* Dark Mode Variables - Default Command Center style */
+    --background: #0b0b0f;
+    --foreground: #f8fafc;
+
+    --card: #1e1e24;
+    --card-foreground: #f8fafc;
+    --card-border: #2a2a35;
+
+    --primary: #f8fafc;
+    --primary-foreground: #0b0b0f;
+
+    --muted: #1e1e24;
+    --muted-foreground: #94a3b8;
+
+    --success: #10b981;
+    --success-foreground: #0b0b0f;
+
+    --warning: #f59e0b;
+    --warning-foreground: #0b0b0f;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+
+    --border: #2a2a35;
+  }
+
+  /* Light mode classes if explicitly set */
+  .light {
+    --background: #fafafa;
+    --foreground: #111827;
+
+    --card: #ffffff;
+    --card-foreground: #111827;
+    --card-border: #e5e7eb;
+
+    --primary: #0f172a;
+    --primary-foreground: #f8fafc;
+
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+
+    --success: #10b981;
+    --success-foreground: #ffffff;
+
+    --warning: #f59e0b;
+    --warning-foreground: #ffffff;
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+
+    --border: #e2e8f0;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
