@@ -48,6 +48,11 @@ export class AppConfigRepository implements IAppConfigRepository {
         longestStreak: data.longestStreak ?? 0,
         redFlagStatus: data.redFlagStatus ?? false,
         lastStreakReset: data.lastStreakReset ?? new Date(),
+        theme: data.theme ?? "dark",
+        timezone: data.timezone ?? "GMT+7",
+        dailyReminder: data.dailyReminder ?? "08:00",
+        weeklyReminder: data.weeklyReminder ?? "08:00",
+        dashboardLayout: data.dashboardLayout ?? "3-column",
       },
     });
   }
@@ -69,6 +74,11 @@ export class AppConfigRepository implements IAppConfigRepository {
         longestStreak: data?.longestStreak ?? 0,
         redFlagStatus: data?.redFlagStatus ?? false,
         lastStreakReset: data?.lastStreakReset ?? new Date(),
+        theme: data?.theme ?? "dark",
+        timezone: data?.timezone ?? "GMT+7",
+        dailyReminder: data?.dailyReminder ?? "08:00",
+        weeklyReminder: data?.weeklyReminder ?? "08:00",
+        dashboardLayout: data?.dashboardLayout ?? "3-column",
       },
     });
   }

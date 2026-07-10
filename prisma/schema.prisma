@@ -64,6 +64,13 @@ model CompanyConfig {
   redFlagStatus   Boolean  @default(false)
   lastStreakReset DateTime @default(now())
 
+  // AppConfig settings fields
+  theme           String   @default("dark")
+  timezone        String   @default("GMT+7")
+  dailyReminder   String   @default("08:00")
+  weeklyReminder  String   @default("08:00")
+  dashboardLayout String   @default("3-column")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
