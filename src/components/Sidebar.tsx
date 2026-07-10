@@ -18,9 +18,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: "📊" },
-    { name: "Skripsi & Riset", href: "/thesis", icon: "🎓" },
+    { name: "Skripsi", href: "/skripsi", icon: "🎓" },
     { name: "Job Readiness", href: "/job-readiness", icon: "💼" },
     { name: "Skill Building", href: "/skill-building", icon: "🛠️" },
+    { name: "Organization", href: "/organization", icon: "🗓️" },
     { name: "Settings", href: "/settings", icon: "⚙️" },
   ];
 
