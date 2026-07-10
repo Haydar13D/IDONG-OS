@@ -26,7 +26,7 @@ export async function handleLogin(passcode: string) {
     };
 
     // Encrypt token and set secure cookie
-    const token = encryptSession(payload);
+    const token = await encryptSession(payload);
     setSessionCookie(token);
     success = true;
   } catch (error) {

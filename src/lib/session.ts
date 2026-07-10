@@ -1,15 +1,19 @@
-import crypto from "crypto";
-
-const ALGORITHM = "aes-256-gcm";
-const IV_LENGTH = 12;
-const SALT_LENGTH = 16;
-const TAG_LENGTH = 16;
+// Use native global Web Crypto API (supported natively in both Node 18+ and Next.js Edge)
+const subtle = crypto.subtle;
+const encoder = new TextEncoder();
 
 /**
- * Derives a cryptographically strong key from the secret string using PBKDF2.
+ * Derives a CryptoKey from the secret string for HMAC-SHA256 operations.
  */
-function getKey(secret: string, salt: Buffer): Buffer {
-  return crypto.pbkdf2Sync(secret, salt, 100000, 32, "sha256");
+async function getCryptoKey(secret: string): Promise<CryptoKey> {
+  const keyData = encoder.encode(secret);
+  return subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"]
+  );
 }
 
 interface SessionPayload {
@@ -19,67 +23,58 @@ interface SessionPayload {
 }
 
 /**
- * Encrypts a session payload into a cryptographically secure token string.
- * Uses AES-256-GCM to guarantee confidentiality and integrity (AEAD).
+ * Encrypts/signs a session payload into a cryptographically secure token.
+ * Uses HMAC-SHA256 to guarantee authenticity and integrity.
  * 
  * @param payload - Object containing session state data.
- * @returns string - Base64url encoded token.
+ * @returns Promise<string> - Signed Base64url token string.
  */
-export function encryptSession(payload: SessionPayload): string {
+export async function encryptSession(payload: SessionPayload): Promise<string> {
   const secret = process.env.SESSION_SECRET;
   if (!secret) {
     throw new Error("SESSION_SECRET environment variable is not defined");
   }
 
-  const salt = crypto.randomBytes(SALT_LENGTH);
-  const key = getKey(secret, salt);
-  const iv = crypto.randomBytes(IV_LENGTH);
+  const key = await getCryptoKey(secret);
+  const payloadString = JSON.stringify(payload);
+  const data = encoder.encode(payloadString);
+  const signature = await subtle.sign("HMAC", key, data);
 
-  const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-  const encrypted = Buffer.concat([
-    cipher.update(JSON.stringify(payload), "utf8"),
-    cipher.final()
-  ]);
-  const tag = cipher.getAuthTag();
+  const payloadBase64 = Buffer.from(payloadString).toString("base64url");
+  const signatureBase64 = Buffer.from(signature).toString("base64url");
 
-  // Combine salt, iv, tag, and encrypted data into a single buffer
-  const sessionBuffer = Buffer.concat([salt, iv, tag, encrypted]);
-  return sessionBuffer.toString("base64url");
+  return `${payloadBase64}.${signatureBase64}`;
 }
 
 /**
- * Decrypts and verifies a session token.
+ * Decrypts/verifies a session token.
  * 
- * @param token - Base64url encoded token to decrypt.
- * @returns SessionPayload | null - The decrypted payload if successful, otherwise null.
+ * @param token - Base64url signed token to verify.
+ * @returns Promise<SessionPayload | null> - Decrypted payload if verification succeeds, otherwise null.
  */
-export function decryptSession(token: string): SessionPayload | null {
+export async function decryptSession(token: string): Promise<SessionPayload | null> {
   try {
     const secret = process.env.SESSION_SECRET;
     if (!secret) {
       throw new Error("SESSION_SECRET environment variable is not defined");
     }
 
-    const buffer = Buffer.from(token, "base64url");
+    const [payloadBase64, signatureBase64] = token.split(".");
+    if (!payloadBase64 || !signatureBase64) {
+      return null;
+    }
 
-    // Extract components from structural buffer
-    const salt = buffer.subarray(0, SALT_LENGTH);
-    const iv = buffer.subarray(SALT_LENGTH, SALT_LENGTH + IV_LENGTH);
-    const tag = buffer.subarray(SALT_LENGTH + IV_LENGTH, SALT_LENGTH + IV_LENGTH + TAG_LENGTH);
-    const encrypted = buffer.subarray(SALT_LENGTH + IV_LENGTH + TAG_LENGTH);
+    const payloadString = Buffer.from(payloadBase64, "base64url").toString("utf8");
+    const payload = JSON.parse(payloadString) as SessionPayload;
 
-    const key = getKey(secret, salt);
-    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
-    decipher.setAuthTag(tag);
+    const key = await getCryptoKey(secret);
+    const signatureBuffer = Buffer.from(signatureBase64, "base64url");
+    const data = encoder.encode(payloadString);
 
-    const decrypted = Buffer.concat([
-      decipher.update(encrypted),
-      decipher.final()
-    ]);
-
-    return JSON.parse(decrypted.toString("utf8"));
+    const isValid = await subtle.verify("HMAC", key, signatureBuffer, data);
+    return isValid ? payload : null;
   } catch (error) {
-    // Return null if signature verification or decryption fails
     return null;
   }
 }
+
