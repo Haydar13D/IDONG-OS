@@ -2,30 +2,44 @@
 
 import React, { useState } from "react";
 import Sidebar from "./Sidebar";
+import PageContainer from "./PageContainer";
+import MainContent from "./MainContent";
 import Header from "./Header";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  pageTitle?: string;
+  streakCount?: number;
+  onLogStandupClick?: () => void;
 }
 
 /**
  * DashboardLayout Component.
- * The core layout skeleton connecting Sidebar, Header, and main grid slots.
+ * Orchestrates full viewport layout displaying a 280px desktop sidebar, header elements,
+ * and passes standup triggers to the client.
  */
-export default function DashboardLayout({ children, pageTitle }: DashboardLayoutProps) {
+export default function DashboardLayout({
+  children,
+  streakCount = 0,
+  onLogStandupClick,
+}: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Drawer navigation */}
+    <PageContainer>
+      {/* Sidebar - 280px */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      {/* Page Layout Offset Container */}
-      <div className="flex flex-col md:pl-60">
-        <Header onMenuToggle={() => setSidebarOpen(true)} title={pageTitle} />
-        <main className="flex-1 p-6">{children}</main>
+      {/* Viewport container offsetting desktop sidebar */}
+      <div className="flex flex-1 flex-col md:pl-[280px]">
+        <Header 
+          onMenuToggle={() => setSidebarOpen(true)} 
+          streakCount={streakCount}
+          onLogStandupClick={onLogStandupClick}
+        />
+
+        {/* Main Content Component wrapper */}
+        <MainContent>{children}</MainContent>
       </div>
-    </div>
+    </PageContainer>
   );
 }

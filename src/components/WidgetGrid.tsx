@@ -7,13 +7,13 @@ interface WidgetGridProps {
 
 /**
  * WidgetGrid Component.
- * Responsive grid container supporting dynamic 2-column or 3-column structures.
+ * Responsive grid container: 1 column on mobile, 2 on tablet (md), 3 on desktop (lg).
  */
-export default function WidgetGrid({ children, columns = "2-column" }: WidgetGridProps) {
+export default function WidgetGrid({ children, columns = "3-column" }: WidgetGridProps) {
   const gridColsClass =
-    columns === "3-column"
-      ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-      : "grid-cols-1 lg:grid-cols-2";
+    columns === "2-column"
+      ? "grid-cols-1 md:grid-cols-2"
+      : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
 
   return (
     <div className={`grid gap-6 ${gridColsClass}`}>
@@ -21,3 +21,4 @@ export default function WidgetGrid({ children, columns = "2-column" }: WidgetGri
     </div>
   );
 }
+
