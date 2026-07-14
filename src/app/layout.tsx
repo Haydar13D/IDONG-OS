@@ -30,12 +30,6 @@ export default function RootLayout({
       className={`dark ${outfit.variable} ${geistMono.variable}`}
       style={{ colorScheme: "dark" }}
     >
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        />
-      </head>
       <body className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary selection:text-primary-foreground">
         {children}
       </body>
