@@ -1,39 +1,39 @@
 import React from "react";
+import Link from "next/link";
 
 interface NavigationItemProps {
   name: string;
-  icon: string;
+  icon: React.ReactNode;
+  href: string;
   isActive?: boolean;
   onClick?: () => void;
 }
 
 /**
  * NavigationItem Component.
- * Reusable layout menu item button with active state highlights and hover translate micro-animations.
+ * Reusable sidebar route links with active state highlights and hover translate micro-animations.
  */
 export default function NavigationItem({
   name,
   icon,
+  href,
   isActive = false,
   onClick,
 }: NavigationItemProps) {
   return (
-    <a
-      href="#"
-      onClick={(e) => {
-        e.preventDefault();
-        if (onClick) onClick();
-      }}
+    <Link
+      href={href}
+      onClick={onClick}
       className={`flex items-center gap-3 rounded px-3 py-2 font-sans text-sm font-medium transition duration-150 ease-in-out transform hover:translate-x-1 ${
         isActive
-          ? "bg-muted text-foreground"
+          ? "bg-muted text-foreground font-semibold"
           : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
       }`}
     >
-      <span className="text-base" role="img" aria-label={name}>
+      <div className="flex items-center justify-center text-lg w-5 h-5" aria-label={name}>
         {icon}
-      </span>
+      </div>
       <span>{name}</span>
-    </a>
+    </Link>
   );
 }

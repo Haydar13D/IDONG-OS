@@ -8,7 +8,13 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isProtectedPath =
-    pathname.startsWith("/dashboard") || pathname.startsWith("/settings");
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/weekly-contract") ||
+    pathname.startsWith("/skripsi") ||
+    pathname.startsWith("/job-readiness") ||
+    pathname.startsWith("/skill-building") ||
+    pathname.startsWith("/analytics");
 
   if (isProtectedPath) {
     const sessionToken = request.cookies.get(COOKIE_NAME)?.value;
@@ -26,5 +32,10 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/settings/:path*",
+    "/weekly-contract/:path*",
+    "/skripsi/:path*",
+    "/job-readiness/:path*",
+    "/skill-building/:path*",
+    "/analytics/:path*",
   ],
 };

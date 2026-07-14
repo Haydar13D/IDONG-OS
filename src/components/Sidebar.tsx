@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { usePathname } from "next/navigation";
 import NavigationItem from "./NavigationItem";
 
 interface SidebarProps {
@@ -10,18 +11,19 @@ interface SidebarProps {
 
 /**
  * Sidebar Component.
- * Responsive sidebar panel using NavigationItem hooks and tracking active menu state locally.
+ * Responsive sidebar panel using NavigationItem hooks mapped to active router pathnames.
  */
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const pathname = usePathname();
 
   const navItems = [
-    { name: "Dashboard", icon: "📊" },
-    { name: "Skripsi", icon: "🎓" },
-    { name: "Job Readiness", icon: "💼" },
-    { name: "Skill Building", icon: "🛠️" },
-    { name: "Organization", icon: "🗓️" },
-    { name: "Settings", icon: "⚙️" },
+    { name: "Dashboard", icon: <span className="material-symbols-rounded">dashboard</span>, href: "/dashboard" },
+    { name: "Analytics", icon: <span className="material-symbols-rounded">monitoring</span>, href: "/analytics" },
+    { name: "Skripsi", icon: <span className="material-symbols-rounded">school</span>, href: "/skripsi" },
+    { name: "Weekly Contract", icon: <span className="material-symbols-rounded">history_edu</span>, href: "/weekly-contract" },
+    { name: "Job Readiness", icon: <span className="material-symbols-rounded">business_center</span>, href: "/job-readiness" },
+    { name: "Skill Building", icon: <span className="material-symbols-rounded">handyman</span>, href: "/skill-building" },
+    { name: "Settings", icon: <span className="material-symbols-rounded">settings</span>, href: "/settings" },
   ];
 
   return (
@@ -42,9 +44,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         <div className="flex h-14 items-center border-b border-card-border px-6">
           <a
-            href="#"
+            href="/dashboard"
             onClick={(e) => {
-              e.preventDefault();
               onClose();
             }}
             className="flex items-center gap-2"
@@ -57,18 +58,19 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         <nav className="flex-1 space-y-1 px-4 py-6">
-          {navItems.map((item, index) => (
-            <NavigationItem
-              key={item.name}
-              name={item.name}
-              icon={item.icon}
-              isActive={index === activeIndex}
-              onClick={() => {
-                setActiveIndex(index);
-                onClose();
-              }}
-            />
-          ))}
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <NavigationItem
+                key={item.name}
+                name={item.name}
+                icon={item.icon}
+                href={item.href}
+                isActive={isActive}
+                onClick={onClose}
+              />
+            );
+          })}
         </nav>
       </aside>
     </>

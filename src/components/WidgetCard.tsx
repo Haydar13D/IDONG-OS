@@ -2,7 +2,7 @@ import React from "react";
 
 interface WidgetCardProps {
   title: string;
-  icon?: string;
+  icon?: React.ReactNode;
   children: React.ReactNode;
   action?: React.ReactNode;
 }
@@ -16,7 +16,7 @@ export default function WidgetCard({ title, icon, children, action }: WidgetCard
     <div className="flex flex-col justify-between rounded-lg border border-card-border bg-card p-6 shadow-sm min-h-[12rem]">
       <div className="flex items-center justify-between border-b border-card-border pb-2 mb-4">
         <div className="flex items-center gap-2">
-          {icon && <span className="text-sm">{icon}</span>}
+          {icon && <div className="flex items-center justify-center text-sm">{icon}</div>}
           <span className="font-sans text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             {title}
           </span>

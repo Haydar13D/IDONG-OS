@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./prisma:/app/prisma
+      - ./.env:/app/.env
+    restart: always
+    environment:
+      - DATABASE_URL=file:/app/prisma/dev.db
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["npx", "ts-node", "worker/daemon.ts"]
+    volumes:
+      - ./prisma:/app/prisma
+      - ./.env:/app/.env
+    restart: always
+    environment:
+      - DATABASE_URL=file:/app/prisma/dev.db

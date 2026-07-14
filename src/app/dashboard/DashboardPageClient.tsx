@@ -13,6 +13,8 @@ import StreakWidget from "../../components/widgets/StreakWidget";
 import RecentActivityWidget from "../../components/widgets/RecentActivityWidget";
 import AbsensiCalendarWidget from "../../components/widgets/AbsensiCalendarWidget";
 
+import { PopulatedContract } from "../../repositories/WeeklyContractRepository";
+
 interface DashboardPageClientProps {
   initialData: {
     currentStreak: number;
@@ -22,6 +24,7 @@ interface DashboardPageClientProps {
     todayFocus: string | null;
     recentActivities: Array<{ id: string; event: string; time: string; details: string }>;
     historyLogs: Array<{ date: string; done: boolean }>;
+    weeklyContract: PopulatedContract | null;
   };
 }
 
@@ -84,7 +87,7 @@ export default function DashboardPageClient({ initialData }: DashboardPageClient
         {/* Left Column Widgets */}
         <div className="space-y-6">
           <TodayFocusWidget todayFocus={data.todayFocus} />
-          <WeeklyContractWidget />
+          <WeeklyContractWidget contract={data.weeklyContract} />
           <QuickActionWidget onLogStandupClick={() => setStandupOpen(true)} />
         </div>
 

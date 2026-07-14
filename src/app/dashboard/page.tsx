@@ -1,8 +1,18 @@
 import React from "react";
 import prisma from "../../lib/db";
 import DashboardPageClient from "./DashboardPageClient";
+import { WeeklyContractRepository } from "../../repositories/WeeklyContractRepository";
 
 export const dynamic = "force-dynamic";
+
+function getWeekAndYear(date: Date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+  return { weekNumber: weekNo, year: d.getUTCFullYear() };
+}
 
 /**
  * DashboardPage Server Component.
@@ -128,6 +138,11 @@ export default async function DashboardPage() {
     });
   }
 
+  // 6. Fetch active weekly contract
+  const contractRepo = new WeeklyContractRepository();
+  const { weekNumber, year: isoYear } = getWeekAndYear(today);
+  const weeklyContract = await contractRepo.getActiveContract(weekNumber, isoYear);
+
   return (
     <DashboardPageClient
       initialData={{
@@ -138,6 +153,7 @@ export default async function DashboardPage() {
         todayFocus,
         recentActivities,
         historyLogs,
+        weeklyContract,
       }}
     />
   );
